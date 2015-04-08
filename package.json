@@ -1,0 +1,34 @@
+{
+  "name": "gitty-github",
+  "version": "0.0.1",
+  "description": "A gitty wrapper for github.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gitty",
+    "github",
+    "wrapper"
+  ],
+  "author": {
+    "name": "teawithfruit",
+    "email": "teawithfruit@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teawithfruit/gitty-github.git"
+  },
+  "homepage": "https://github.com/teawithfruit/gitty-github",
+  "bugs": {
+    "url": "https://github.com/teawithfruit/gitty-github/issues"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^0.16.5",
+    "gitty": "^3.2.1",
+    "promisify-node": "^0.1.5",
+    "q": "^1.2.0",
+    "request": "^2.54.0"
+  }
+}
