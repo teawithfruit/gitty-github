@@ -4,7 +4,7 @@ var koa = require('koa'),
     session = require('koa-session');
 
 var Grant = require('grant-koa'),
-    grant = new Grant(require('../config.json'));
+    grant = new Grant(require('../auth.json'));
 
 var Q = require("q");
 var git = require("../");
@@ -53,8 +53,6 @@ app.use(route.get('/handle/github', function* (next) {
 
   this.body = JSON.stringify(this.query, null, 2);
 }));
-
-
 
 app.listen(3000, function() {
   console.log('Koa server listening on port ' + 3000);
