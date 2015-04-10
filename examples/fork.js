@@ -8,8 +8,7 @@ var fork = Q.async(function*() {
 
   yield github.init(
     { url: 'https://github.com/pixelpark/ppnet.git', local: '/Development/git/gitty-github/tmp' },
-    //{ local: '/Development/git/gitty-github/tmp/' },
-    { user: 'USERNAME', type: 'token', token: 'GITHUB_TOKEN', fullName: 'FULLNAME', email: 'E-MAIL' }
+    { type: 'token', token: 'GITHUB_TOKEN' }
   );
 
   /*

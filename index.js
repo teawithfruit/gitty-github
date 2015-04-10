@@ -11,7 +11,6 @@ var url = require('url');
 module.exports = function() {
   var cred = {
     user:       undefined,
-    password:   undefined,
     fullName:   undefined,
     email:      undefined,
     token:      undefined,
@@ -70,10 +69,6 @@ module.exports = function() {
       }
 
       if(c != undefined) {
-        if(c.user) cred.user = c.user;
-        if(c.password) cred.password = c.password;
-        if(c.fullName) cred.fullName = c.fullName;
-        if(c.email) cred.email = c.email;
         if(c.token) cred.token = c.token;
         if(c.type) cred.type = c.type;
       }
@@ -87,11 +82,57 @@ module.exports = function() {
       return true;
     }),
 
+    getGithubUser: Q.async(function*() {
+      var deferred = Q.defer();
+
+      request.get({
+        headers: { 'User-Agent': 'gitty-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
+        url: 'https://api.github.com/user'
+      }, function(err, httpResponse, body) {
+        if(!err) {
+          var u = JSON.parse(body);
+
+          cred.user = u.login;
+
+          if(u.name) {
+            cred.fullName = u.name;
+          } else {
+            cred.fullName = u.login;
+          }
+
+          deferred.resolve();
+        } else {
+          deferred.reject();
+        }
+      });
+
+      return deferred.promise;
+    }),
+
+    getGithubEmail: Q.async(function*() {
+      var deferred = Q.defer();
+
+      request.get({
+        headers: { 'User-Agent': 'gitty-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
+        url: 'https://api.github.com/user/emails'
+      }, function(err, httpResponse, body) {
+        if(!err) {
+          cred.email = JSON.parse(body)[0].email;
+          
+          deferred.resolve();
+        } else {
+          deferred.reject();
+        }
+      });
+
+      return deferred.promise;
+    }),
+
     createGithubRepo: Q.async(function*() {
       var deferred = Q.defer();
 
       request.post({
-        headers: { 'User-Agent': 'nodegit-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
+        headers: { 'User-Agent': 'gitty-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
         url: 'https://api.github.com/user/repos',
         json: { name: repo.name }
       }, function(err, httpResponse, body) {
@@ -112,7 +153,7 @@ module.exports = function() {
       yield getRepoConfig(repo.local);
 
       yield request.post({
-        headers: { 'User-Agent': 'nodegit-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
+        headers: { 'User-Agent': 'gitty-github', 'Authorization': 'token ' + cred.token, 'Content-type': 'application/json' },
         url: 'https://api.github.com/repos/' + repo.owner + '/' + repo.name + '/forks',
         organization: cred.user
       });
@@ -130,6 +171,10 @@ module.exports = function() {
       var promises = [];
 
       promises.push(gitty.setConfigLocal(repo.local, 'credential.helper', 'store --file ./.git-credentials', function(err) {
+        deferred.resolve();
+      }));
+
+      promises.push(fse.writeFile(path.resolve(repo.local, '.git-credentials'), 'https://' + cred.user + ':' + cred.token + '@github.com' + '\n', function (err) {
         deferred.resolve();
       }));
 
