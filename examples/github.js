@@ -25,29 +25,28 @@ app.use(route.get('/handle/github', function* (next) {
   /*
   Case 1
 
-  yield github.run('clone');
-  yield github.run('checkout');
-  yield github.run('status');
-  yield github.run('add');
-  yield github.run('commit');
-  yield github.run('push');
+  yield git.run('clone');
+  yield git.run('checkout');
+  yield git.run('status');
+  yield git.run('add');
+  yield git.run('commit');
+  yield git.run('push');
   */
 
-  //Case 2
-  //yield github.run('fork');
-  //yield github.run('checkout');
-  //yield github.run('status');
-  //yield github.run('add');
-  //yield github.run('commit');
+  /*
+  yield git.run('fork');
   yield git.run('getGithubUser');
   yield git.run('getGithubEmail');
+  yield git.run('setRemoteURL');
   yield git.run('setCredentials');
-  //yield github.run('push');
+  yield git.run('status');
+  */
 
-
-  //Other
-  //yield github.run('setRemoteURL');
-  //yield github.run('getConfig');
+  
+  yield git.run('status');
+  yield git.run('add');
+  yield git.run('commit');
+  yield git.run('push');
 
   console.log('handled');
 

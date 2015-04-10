@@ -234,7 +234,7 @@ module.exports = function() {
     push: Q.async(function*() {
       var deferred = Q.defer();
 
-      repo.open.push('origin', 'master', { username: cred.user, password: cred.token }, function(err, result) {
+      repo.open.push('origin', 'master', function(err, result) {
         if (err) return console.log(err);
         
         deferred.resolve();
@@ -267,20 +267,10 @@ module.exports = function() {
       return deferred.promise;
     }),
 
-    getConfig: Q.async(function*() {
-      var deferred = Q.defer();
-
-      gitty.getConfig('user', function(err, username) {
-        deferred.resolve();
-      });
-
-      return deferred.promise;
-    }),
-
     setRemoteURL: Q.async(function*() {
       var deferred = Q.defer();
 
-      repo.open.setRemoteUrl('origin', repo.url, function(err) {
+      repo.open.setRemoteUrl('origin', 'https://' + cred.user + ':' + cred.token + '@github.com/' + cred.user + '/' + repo.name + '.git', function(err) {
         deferred.resolve();
       });
 
