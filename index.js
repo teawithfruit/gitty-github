@@ -125,6 +125,23 @@ module.exports = function() {
       return deferred.promise;
     }),
 
+    setCredentials: Q.async(function*() {
+      var deferred = Q.defer();
+      var promises = [];
+
+      promises.push(gitty.setConfigLocal(repo.local, 'credential.helper', 'store --file ./.git-credentials', function(err) {
+        deferred.resolve();
+      }));
+
+      if(repo.open != undefined) {
+        promises.push(gitty.setConfigLocal(repo.local, 'credential.https://github.com/' + cred.user + '/' + repo.name + '.git.username ', cred.user, function(err) {
+          deferred.resolve();
+        }));
+      }
+
+      return Q.all(promises);
+    }),
+
     clone: Q.async(function*() {
       var deferred = Q.defer();
 
@@ -152,7 +169,7 @@ module.exports = function() {
     add: Q.async(function*() {
       var deferred = Q.defer();
 
-      repo.open.add(['aaa2.rb'], function(err) {
+      repo.open.add(['test.txt'], function(err) {
         deferred.resolve();
       });
 
@@ -173,7 +190,8 @@ module.exports = function() {
       var deferred = Q.defer();
 
       repo.open.push('origin', 'master', { username: cred.user, password: cred.token }, function(err, result) {
-        console.log(err);
+        if (err) return console.log(err);
+        
         deferred.resolve();
       });
 
@@ -227,6 +245,7 @@ module.exports = function() {
     run: Q.async(function*(func) {
       if(repo.open == undefined && fse.existsSync(path.resolve(repo.local, '.git'))) {
         yield pub.open();
+        yield getRepoConfig(repo.local);
       }
 
       var result = yield pub[func]();

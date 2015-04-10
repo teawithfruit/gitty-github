@@ -29,7 +29,8 @@ var fork = Q.async(function*() {
   //yield github.run('status');
   //yield github.run('add');
   //yield github.run('commit');
-  yield github.run('push');
+  yield github.run('setCredentials');
+  //yield github.run('push');
 
 
   //Other
