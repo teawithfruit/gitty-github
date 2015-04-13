@@ -6,7 +6,6 @@ var koa = require('koa'),
 var Grant = require('grant-koa'),
     grant = new Grant(require('../auth.json'));
 
-var Q = require("q");
 var git = require("../");
 
 var app = koa();
