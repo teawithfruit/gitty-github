@@ -3,14 +3,12 @@
 var promisify = require("promisify-node");
 var gitty = require('gitty');
 var Q = require("q");
-var fse_promisified = require("fs-extra");
+var fse = require("fs-extra");
 var path = require("path");
 var request = require('request');
 var url = require('url');
 
 module.exports = function() {
-  var fse_promisified = promisify(fse_promisified);
-
   var cred = {
     user:       undefined,
     fullName:   undefined,
@@ -36,14 +34,13 @@ module.exports = function() {
     var deferred = Q.defer();
 
     var directory = undefined;
-    if(fse_promisified.existsSync(path.resolve(thePath, 'config'))) {
+    if(fse.existsSync(path.resolve(thePath, 'config'))) {
       directory = path.resolve(thePath, 'config');
     } else {
       directory = path.resolve(thePath, '.git', 'config');
     } 
 
-    fse_promisified.readFile(directory, 'utf8')
-    .done(function(data) {
+    fse.readFile(directory, 'utf8', function (err, data) {
       if(data) {
         var match = data.match(/url\s*=\s*[^\n]*/gm);
 
@@ -55,7 +52,7 @@ module.exports = function() {
       } else {
         deferred.reject();
       }
-    });
+    })
 
     return deferred.promise;
   });
@@ -176,7 +173,7 @@ module.exports = function() {
         deferred.resolve();
       }));
 
-      promises.push(fse_promisified.writeFile(path.resolve(repo.local, '.git-credentials'), 'https://' + cred.user + ':' + cred.token + '@github.com' + '\n', function (err) {
+      promises.push(fse.writeFile(path.resolve(repo.local, '.git-credentials'), 'https://' + cred.user + ':' + cred.token + '@github.com' + '\n', function (err) {
         deferred.resolve();
       }));
 
@@ -280,7 +277,7 @@ module.exports = function() {
     }),
 
     run: Q.async(function*(func) {
-      if(repo.open == undefined && fse_promisified.existsSync(path.resolve(repo.local, '.git'))) {
+      if(repo.open == undefined && fse.existsSync(path.resolve(repo.local, '.git'))) {
         yield pub.open();
         yield getRepoConfig(repo.local);
       }
