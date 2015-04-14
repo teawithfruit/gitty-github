@@ -24,7 +24,8 @@ module.exports = function() {
     copy:         undefined,
     owner:        undefined,
     name:         undefined,
-    open:         undefined
+    open:         undefined,
+    files:        undefined
   };
 
   var tmp = {};
@@ -163,7 +164,9 @@ module.exports = function() {
       });
 
       repo.url = 'https://github.com/' + cred.user + '/' + repo.name + '.git';
+
       yield pub.setRemoteURL();
+      yield pub.setCredentials();
 
       deferred.resolve();
 
@@ -217,15 +220,33 @@ module.exports = function() {
         }
       });
 
-
       return deferred.promise;
     }),
 
     status: Q.async(function*() {
       var deferred = Q.defer();
 
+      repo.files = [];
+
       repo.open.status(function(err, status) {
-        console.log(status);
+        if(status.staged.length > 0) {
+          status.staged.forEach(function(entry) {
+            if(entry != '.git-credentials') repo.files.push(entry.file);
+          });
+        }
+
+        if(status.unstaged.length > 0) {
+          status.unstaged.forEach(function(entry) {
+            if(entry != '.git-credentials') repo.files.push(entry.file);
+          });
+        }
+
+        if(status.untracked.length > 0) {
+          status.untracked.forEach(function(entry) {
+            if(entry != '.git-credentials') repo.files.push(entry);
+          });
+        }
+
         deferred.resolve();
       });
 
@@ -235,7 +256,9 @@ module.exports = function() {
     add: Q.async(function*() {
       var deferred = Q.defer();
 
-      repo.open.add(['test.txt'], function(err) {
+      yield pub.status();
+      
+      repo.open.add(repo.files, function(err) {
         deferred.resolve();
       });
 
@@ -245,7 +268,7 @@ module.exports = function() {
     commit: Q.async(function*() {
       var deferred = Q.defer();
 
-      repo.open.commit('yeah yeah 2', function(err) {
+      repo.open.commit('From FIC2 Playground', function(err) {
         deferred.resolve();
       });
 
