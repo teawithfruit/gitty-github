@@ -21,6 +21,7 @@ module.exports = function() {
   var repo = {
     url:          undefined,
     local:        undefined,
+    copy:         undefined,
     owner:        undefined,
     name:         undefined,
     open:         undefined
@@ -62,6 +63,7 @@ module.exports = function() {
 
       if(r != undefined) {
         if(r.url) repo.url = r.url;
+        if(r.copy) repo.copy = r.copy;
         if(r.owner) repo.owner = r.owner;
         if(r.name) repo.name = r.name;
         if(r.local) repo.local = r.local;
@@ -148,6 +150,9 @@ module.exports = function() {
     fork: Q.async(function*() {
       var deferred = Q.defer();
 
+      yield pub.getGithubUser();
+      yield pub.getGithubEmail();
+
       yield pub.clone();
       yield getRepoConfig(repo.local);
 
@@ -189,12 +194,29 @@ module.exports = function() {
     clone: Q.async(function*() {
       var deferred = Q.defer();
 
-      gitty.clone(repo.local, repo.url, function(err) {
-        pub.open()
-        .then(function() {
+      fse.stat(repo.local, function(err, stats) {
+        if(!stats.isDirectory()) {
+
+          if(repo.copy != undefined) {
+            fse.copy(repo.copy, repo.local, function (err) {
+              if (err) return console.error(err);
+
+              deferred.resolve();
+            });
+          } else {
+            gitty.clone(repo.local, repo.url, function(err) {
+              pub.open()
+              .then(function() {
+                deferred.resolve();
+              })
+            });
+          }
+
+        } else {
           deferred.resolve();
-        })
+        }
       });
+
 
       return deferred.promise;
     }),
